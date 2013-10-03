@@ -450,7 +450,7 @@ methods are necessary:
 
 For a given day, and optionally C<month> and C<year> if they are
 different from those specified in C<new()>, provide the day of week
-number. (1=Sunday, 7=Saturday).
+number. (0=Sunday, 6=Saturday).
 
 =item add_days($days, $delta, $day, [$month], [$year])
 
