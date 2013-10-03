@@ -1,12 +1,8 @@
 Changes
 LICENSE
 MANIFEST
-MANIFEST.SKIP
-META.json
 Makefile.PL
 README
-bs.pm
-dist.ini
 lib/HTML/CalendarMonth.pm
 lib/HTML/CalendarMonth/DateTool.pm
 lib/HTML/CalendarMonth/DateTool/Cal.pm
@@ -26,13 +22,10 @@ t/06_cal.t
 t/07_ncal.t
 t/20_i8n.t
 t/21_narrow.t
-t/author-critic.t
 t/dat/bulk.dat
 t/dat/head.dat
 t/dat/i8n.dat
 t/dat/narrow.dat
 t/dat/odd.dat
 t/dat/woy.dat
-t/release-pod-coverage.t
-t/release-pod-syntax.t
 t/testload.pm
