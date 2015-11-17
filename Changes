@@ -1,5 +1,8 @@
 Revision history for HTML-CalendarMonth
 
+2.01  Tue Nov 17 14:26:35 EST 2015
+        - fixed minor bug with undefined 'today' attribute
+
 2.00  Tue Nov 17 13:48:44 EST 2015
         - Updated for compatibility with DateTime::Locale
           versions 0.90 and greater. Backwards compatibility
