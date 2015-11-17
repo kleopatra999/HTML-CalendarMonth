@@ -51,7 +51,6 @@ my %Calmonth_Attrs = (
   _ctoih    => {},
   _caltool  => undef,
   _weeknums => undef,
-  _today    => undef,
 
   dow1st   => undef,
   lastday  => undef,
@@ -596,7 +595,7 @@ sub first_week_row { FWR };
 
 sub past_days {
   my $self  = shift;
-  my $today = $self->_today;
+  my $today = $self->today;
   if ($today < 0) {
     return $self->days;
   }
@@ -608,7 +607,7 @@ sub past_days {
 
 sub future_days {
   my $self  = shift;
-  my $today = $self->_today;
+  my $today = $self->today;
   if ($today < 0) {
     return;
   }
@@ -907,8 +906,7 @@ sub new {
 
   my $dom_now = defined $attrs{today} ? $dt->_dom_now(delete $attrs{today})
                                       : $dt->_dom_now;
-  $self->_today($dom_now);
-  $self->today($dom_now) if $dom_now > 0;
+  $self->today($dom_now);
 
   my $alias = $attrs{alias} || {};
   if ($self->full_days < 0) {
