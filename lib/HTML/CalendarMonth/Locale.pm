@@ -1,6 +1,6 @@
 package HTML::CalendarMonth::Locale;
 {
-  $HTML::CalendarMonth::Locale::VERSION = '1.26';
+  $HTML::CalendarMonth::Locale::VERSION = '2.00';
 }
 
 # Front end class around DateTime::Locale. In addition to providing
@@ -14,6 +14,18 @@ use Carp;
 
 use DateTime::Locale 0.45;
 
+sub _locale_version { $DateTime::Locale::VERSION }
+
+my($CODE_METHOD, $CODES_METHOD);
+if (_locale_version() > 0.46) {
+  $CODE_METHOD  = "code";
+  $CODES_METHOD = "codes";
+}
+else {
+  $CODE_METHOD  = "id";
+  $CODES_METHOD = "ids";
+}
+
 my %Register;
 
 sub new {
@@ -21,24 +33,30 @@ sub new {
   my $self = {};
   bless $self, $class;
   my %parms = @_;
-  my $id = $parms{id} or croak "Locale id required (eg 'en_US')\n";
-  $self->{id} = $id;
+  # id is for backwards compatibility
+  my $code = $parms{code} || $parms{id}
+    or croak "Locale code required (eg 'en-US')\n";
   $self->{full_days}   = defined $parms{full_days}   ? $parms{full_days}   : 0;
   $self->{full_months} = defined $parms{full_months} ? $parms{full_months} : 1;
-  unless ($Register{$id}) {
-    $Register{$id} = $self->locale->load($id)
-      or croak "Problem loading locale '$id'\n";
+  # returned code might be different from given code
+  unless ($Register{$code}) {
+    my $dtl = $self->locale->load($code)
+      or croak "Problem loading locale '$code'";
+    $Register{$code} = $Register{$dtl->$CODE_METHOD} = { loc => $dtl };
   }
+  $self->{code} = $Register{$code}{loc}->$CODE_METHOD;
   $self;
 }
 
 sub locale { 'DateTime::Locale' }
 
-sub loc { $Register{shift->id} }
+sub loc { $Register{shift->code}{loc} }
 
-sub locales { shift->locale->ids }
+sub locales { shift->locale->$CODES_METHOD }
 
-sub id          { shift->{id}          }
+sub code { shift->{code} }
+*id = *code;
+
 sub full_days   { shift->{full_days}   }
 sub full_months { shift->{full_months} }
 
@@ -46,54 +64,57 @@ sub first_day_of_week { shift->loc->first_day_of_week % 7 }
 
 sub days {
   my $self = shift;
-  my $id = $self->id;
-  unless ($Register{$id}{days}) {
-    my $method = $self->full_days > 0 ? 'day_stand_alone_wide'
-                                      : 'day_stand_alone_abbreviated';
+  my $code = $self->code;
+  unless ($Register{$code}{days}) {
+    my $method = $self->full_days ? 'day_stand_alone_wide'
+                                  : 'day_stand_alone_abbreviated';
     # adjust to H::CM standard expectation, 1st day Sun
     # Sunday is first, regardless of what the calendar considers to be
     # the first day of the week
     my @days  = @{$self->loc->$method};
     unshift(@days, pop @days);
-    $Register{$id}{days} = \@days;
+    $Register{$code}{days} = \@days;
   }
-  wantarray ? @{$Register{$id}{days}} : $Register{$id}{days};
+  wantarray ? @{$Register{$code}{days}} : $Register{$code}{days};
 }
 
 sub narrow_days {
   my $self = shift;
-  my $id   = $self->id;
-  unless ($Register{$id}{narrow_days}) {
+  my $code = $self->code;
+  unless ($Register{$code}{narrow_days}) {
     # Sunday is first, regardless of what the calendar considers to be
     # the first day of the week
     my @days = @{ $self->loc->day_stand_alone_narrow };
     unshift(@days, pop @days);
-    $Register{$id}{narrow_days} = \@days;
+    $Register{$code}{narrow_days} = \@days;
   }
-  wantarray ? @{$Register{$id}{narrow_days}} : $Register{$id}{narrow_days};
+  wantarray ? @{$Register{$code}{narrow_days}}
+            :   $Register{$code}{narrow_days};
 }
 
 sub months {
   my $self = shift;
-  my $id = $self->id;
-  unless ($Register{$id}{months}) {
+  my $code = $self->code;
+  unless ($Register{$code}{months}) {
     my $method = $self->full_months > 0 ? 'month_stand_alone_wide'
                                         : 'month_stand_alone_abbreviated';
-    $Register{$id}{months} = [@{$self->loc->$method}];
+    $Register{$code}{months} = [@{$self->loc->$method}];
   }
-  wantarray ? @{$Register{$id}{months}} : $Register{$id}{months};
+  wantarray ? @{$Register{$code}{months}} : $Register{$code}{months};
 }
 
 sub narrow_months {
   my $self = shift;
-  my $id   = $self->id;
-  $Register{$id}{narrow_months} ||= [$self->loc->month_stand_alone_narrow];
-  wantarray ? @{$Register{$id}{narrow_months}} : $Register{$id}{narrow_months};
+  my $code = $self->code;
+  $Register{$code}{narrow_months}
+    ||= [@{$self->loc->month_stand_alone_narrow}];
+  wantarray ? @{$Register{$code}{narrow_months}}
+            :   $Register{$code}{narrow_months};
 }
 
 sub days_minmatch {
   my $self = shift;
-  $Register{$self->id}{days_mm}
+  $Register{$self->code}{days_mm}
     ||= $self->lc_minmatch_hash($self->days);
 }
 *minmatch = \&days_minmatch;
@@ -104,10 +125,9 @@ sub _days_minmatch_pattern {
 }
 *minmatch_pattern = \&_days_minmatch_pattern;
 
-
 sub months_minmatch {
   my $self = shift;
-  $Register{$self->id}{months_mm}
+  $Register{$self->code}{months_mm}
     ||= $self->lc_minmatch_hash($self->months);
 }
 
@@ -118,14 +138,15 @@ sub _months_minmatch_pattern {
 
 sub daynums {
   my $self = shift;
-  my $id = $self->id;
-  unless ($Register{$id}{daynum}) {
+  my $code = $self->code;
+  unless ($Register{$code}{daynum}) {
     my %daynum;
     my $days = $self->days;
     $daynum{$days->[$_]} = $_ foreach 0 .. $#$days;
-    $Register{$id}{daynum} = \%daynum;
+    $Register{$code}{daynum} = \%daynum;
   }
-  $Register{$id}{daynum};
+  wantarray ? %{$Register{$code}{daynum}}
+            :   $Register{$code}{daynum};
 }
 
 sub _daymatch {
@@ -148,14 +169,15 @@ sub dayname { (shift->_daymatch(@_))[1] }
 
 sub monthnums {
   my $self = shift;
-  my $id = $self->id;
-  unless ($Register{$id}{monthnum}) {
+  my $code = $self->code;
+  unless ($Register{$code}{monthnum}) {
     my %monthnum;
     my $months = $self->months;
     $monthnum{$months->[$_]} = $_ foreach 0 .. $#$months;
-    $Register{$id}{monthnum} = \%monthnum;
+    $Register{$code}{monthnum} = \%monthnum;
   }
-  $Register{$id}{monthnum};
+  wantarray ? %{$Register{$code}{monthnum}}
+            :   $Register{$code}{monthnum};
 }
 
 sub _monthmatch {
@@ -181,8 +203,8 @@ sub monthname { (shift->_monthmatch(@_))[1] }
 sub locale_map {
   my $self = shift;
   my %map;
-  foreach my $id ($self->locales) {
-    $map{$id} = $self->locale->load($id)->name;
+  foreach my $code ($self->locales) {
+    $map{$code} = $self->locale->load($code)->name;
   }
   wantarray ? %map : \%map;
 }
@@ -263,7 +285,7 @@ HTML::CalendarMonth::Locale - Front end class for DateTime::Locale
 
   use HTML::CalendarMonth::Locale;
 
-  my $loc = HTML::CalendarMonth::Locale->new( id => 'en_US' );
+  my $loc = HTML::CalendarMonth::Locale->new( code => 'en-US' );
 
   # list of days of the week for locale
   my @days = $loc->days;
@@ -271,9 +293,9 @@ HTML::CalendarMonth::Locale - Front end class for DateTime::Locale
   # list of months of the year for locale
   my @months = $loc->months;
 
-  # the name of the current locale, as supplied the id parameter to
+  # the name of the current locale, as supplied the code parameter to
   # new()
-  my $locale_name = $loc->id;
+  my $locale_name = $loc->code;
 
   # the actual DateTime::Locale object
   my $loc = $loc->loc;
@@ -284,9 +306,9 @@ HTML::CalendarMonth::Locale - Front end class for DateTime::Locale
 
 HTML::CalendarMonth utilizes the powerful locale capabilities of
 DateTime::Locale for rendering its calendars. The default locale is
-'en_US' but many others are available. To see this list, invoke the
+'en-US' but many others are available. To see this list, invoke the
 class method HTML::CalendarMonth::Locale->locales() which in turn
-invokes DateTime::Locale::ids().
+invokes DateTime::Locale::codes().
 
 This module is mostly intended for internal usage within
 HTML::CalendarMonth, but some of its functionality may be of use for
@@ -302,9 +324,9 @@ Constructor. Takes the following parameters:
 
 =over
 
-=item id
+=item code
 
-Locale id, e.g. 'en_US'.
+Locale code, e.g. 'en-US'.
 
 =item full_days
 
@@ -318,9 +340,9 @@ Default 1, use full months.
 
 =back
 
-=item id()
+=item code()
 
-Returns the locale id used during object construction.
+Returns the locale code used during object construction.
 
 =item locale()
 
@@ -329,18 +351,18 @@ several class methods of specific interest. See L<DateTime::Locale>.
 
 =item locale_map()
 
-Returns a hash of all available locales, mapping their id to their
+Returns a hash of all available locales, mapping their code to their
 full name.
 
 =item loc()
 
-Accessor method for the DateTime::Locale instance as specified by C<id>.
+Accessor method for the DateTime::Locale instance as specified by C<code>.
 See L<DateTime::Locale>.
 
 =item locales()
 
-Lists all available locale ids. Equivalent to locale()->ids(), or
-DateTime::Locale->ids().
+Lists all available locale codes. Equivalent to locale()->codes(), or
+DateTime::Locale->codes().
 
 =item days()
 
@@ -430,7 +452,7 @@ Matthew P. Sisk, E<lt>F<sisk@mojotoad.com>E<gt>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2010 Matthew P. Sisk. All rights reserved. All wrongs
+Copyright (c) 2015 Matthew P. Sisk. All rights reserved. All wrongs
 revenged. This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
@@ -438,4 +460,4 @@ modify it under the same terms as Perl itself.
 
 HTML::CalendarMonth(3), DateTime::Locale(3)
 
-=for Pod::Coverage minmatch minmatch_pattern
+=for Pod::Coverage minmatch minmatch_pattern id

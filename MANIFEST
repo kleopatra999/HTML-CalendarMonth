@@ -25,6 +25,7 @@ t/21_narrow.t
 t/dat/bulk.dat
 t/dat/head.dat
 t/dat/i8n.dat
+t/dat/i8n_leg.dat
 t/dat/narrow.dat
 t/dat/odd.dat
 t/dat/woy.dat

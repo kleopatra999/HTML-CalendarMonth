@@ -1,5 +1,11 @@
 Revision history for HTML-CalendarMonth
 
+2.00  Tue Nov 17 13:48:44 EST 2015
+        - Updated for compatibility with DateTime::Locale
+          versions 0.90 and greater. Backwards compatibility
+          retained.
+        - updated tests
+
 1.26  Fri Aug 26 15:08:49 EDT 2011
         - fixed css/header interactions
         - updated tests
