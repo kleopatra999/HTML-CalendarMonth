@@ -1,6 +1,6 @@
 package HTML::CalendarMonth;
 {
-  $HTML::CalendarMonth::VERSION = '2.01';
+  $HTML::CalendarMonth::VERSION = '2.02';
 }
 
 use strict;
