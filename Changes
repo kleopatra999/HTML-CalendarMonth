@@ -1,5 +1,8 @@
 Revision history for HTML-CalendarMonth
 
+2.02  Tue Nov 17 16:18:40 EST 2015
+        - Adjusted version cutoff for legacy locale tests
+
 2.01  Tue Nov 17 14:26:35 EST 2015
         - fixed minor bug with undefined 'today' attribute
 

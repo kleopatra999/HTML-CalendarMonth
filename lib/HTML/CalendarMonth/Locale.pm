@@ -17,7 +17,7 @@ use DateTime::Locale 0.45;
 sub _locale_version { $DateTime::Locale::VERSION }
 
 my($CODE_METHOD, $CODES_METHOD);
-if (_locale_version() > 0.46) {
+if (_locale_version() > 0.92) {
   $CODE_METHOD  = "code";
   $CODES_METHOD = "codes";
 }

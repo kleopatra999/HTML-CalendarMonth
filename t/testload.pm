@@ -86,7 +86,7 @@ _load_file($Odd_File,    \@Odd   );
 _load_file($Woy_File,     \@Woy  );
 _load_file($Narrow_File,   \@Nar);
 
-if (HTML::CalendarMonth::Locale->_locale_version > 0.46) {
+if (HTML::CalendarMonth::Locale->_locale_version > 0.92) {
   _load_file($I8N_File, \@I8N );
 }
 else {
