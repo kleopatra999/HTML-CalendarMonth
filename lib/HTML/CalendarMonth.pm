@@ -969,7 +969,7 @@ HTML::CalendarMonth - Generate and manipulate HTML calendar months
  my $c2 = HTML::CalendarMonth->new(
    month  => 8,
    year   => 2010,
-   locale => 'zu_ZA'
+   locale => 'zu-ZA'
  );
  print $c2->as_HTML;
 
@@ -1080,11 +1080,12 @@ Specifies whether to display the week-of-year numbering. Default 0.
 =item locale
 
 Specifies the id of the locale in which to render the calendar. Default
-is 'en_US'. By default, this will also control determine which day is
+is 'en-US'. By default, this will also control determine which day is
 considered to be the first day of the week. See
 L<HTML::CalendarMonth::Locale> for more information. If for some reason
 you prefer to use different labels than those provided by C<locale>, see
-the C<alias> attribute below.
+the C<alias> attribute below. NOTE: DateTime::Locale versions 0.92 and
+earlier use underscores rather than dashes, e.g. 'en_US'.
 
 =item full_days
 
