@@ -1117,11 +1117,11 @@ is determined based on the locale.
 Set some handy CSS class attributes on elements, enabled by default.
 Currently the classes are:
 
-  hcm-table       Set on the <lt>table<gt> tag of the calendar
-  hcm-day-head    Set on the day-of-week <lt>tr<gt> or <lt>td<gt> tags
-  hcm-year-head   Set on the <lt>td<gt> tag for the year
-  hcm-month-head  Set on the <lt>td<gt> tag for the month
-  hcm-week-head   Set on the <lt>td<gt> tags for the week-of-year
+  hcm-table       Set on the E<lt>tableE<gt> tag of the calendar
+  hcm-day-head    Set on the day-of-week E<lt>trE<gt> or E<lt>tdE<gt> tags
+  hcm-year-head   Set on the E<lt>tdE<gt> tag for the year
+  hcm-month-head  Set on the E<lt>tdE<gt> tag for the month
+  hcm-week-head   Set on the E<lt>tdE<gt> tags for the week-of-year
 
 =item semantic_css
 
@@ -1130,9 +1130,9 @@ default. The notion of 'today' is taken either from the system clock
 (default) or from the 'today' parameter as provided to new(). Currently
 these classes are:
 
-  hcm-today    Set on the <lt>td<gt> tag for today, if present
-  hcm-past     Set on the <lt>td<gt> tags for prior days, if present
-  hcm-future   Set on the <lt>td<gt> tags for subsequent days, if present
+  hcm-today    Set on the E<lt>tdE<gt> tag for today, if present
+  hcm-past     Set on the E<lt>tdE<gt> tags for prior days, if present
+  hcm-future   Set on the E<lt>tdE<gt> tags for subsequent days, if present
 
 =item today
 
