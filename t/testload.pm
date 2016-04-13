@@ -21,7 +21,8 @@ use vars qw(
   $Woy_File
   $Narrow_File
   $I8N_File
-  $I8N_Legacy_File
+  $I8N_Legacy1_File
+  $I8N_Legacy2_File
 );
 
 @EXPORT = qw(
@@ -60,7 +61,8 @@ $Odd_File        = File::Spec->catdir($Dat_Dir,     'odd.dat');
 $Woy_File        = File::Spec->catdir($Dat_Dir,     'woy.dat');
 $Narrow_File     = File::Spec->catdir($Dat_Dir,  'narrow.dat');
 $I8N_File        = File::Spec->catdir($Dat_Dir,     'i8n.dat');
-$I8N_Legacy_File = File::Spec->catdir($Dat_Dir, 'i8n_leg.dat');
+$I8N_Legacy1_File = File::Spec->catdir($Dat_Dir, 'i8n_leg1.dat');
+$I8N_Legacy2_File = File::Spec->catdir($Dat_Dir, 'i8n_leg2.dat');
 
 my(@Bulk, @Head, @Odd, @Woy, @I8N, @Nar);
 
@@ -86,11 +88,14 @@ _load_file($Odd_File,    \@Odd   );
 _load_file($Woy_File,     \@Woy  );
 _load_file($Narrow_File,   \@Nar);
 
-if (HTML::CalendarMonth::Locale->_locale_version > 0.92) {
+if (HTML::CalendarMonth::Locale->_locale_version >= 1.02) {
   _load_file($I8N_File, \@I8N );
 }
+elsif (HTML::CalendarMonth::Locale->_locale_version >= 0.93) {
+  _load_file($I8N_Legacy2_File, \@I8N );
+}
 else {
-  _load_file($I8N_Legacy_File, \@I8N );
+  _load_file($I8N_Legacy1_File, \@I8N );
 }
 
 sub bulk_count   { scalar @Bulk }
